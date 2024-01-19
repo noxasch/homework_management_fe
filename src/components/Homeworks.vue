@@ -1,7 +1,7 @@
 <script setup>
 import TablePagination from './TablePagination.vue';
-import TableBody from './TableBody.vue';
-import TableHeader from './TableHeader.vue';
+import HomeworksTableBody from './tables/HomeworksTableBody.vue';
+import HomeworksTableHeader from './tables/HomeworksTableHeader.vue';
 </script>
 
 <template>
@@ -9,8 +9,8 @@ import TableHeader from './TableHeader.vue';
     <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
 
       <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
-          <TableHeader />
-          <TableBody />
+          <HomeworksTableHeader />
+          <HomeworksTableBody />
           <TablePagination />
       </div>
     </div>
