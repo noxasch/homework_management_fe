@@ -1,13 +1,16 @@
 <script setup>
+defineProps({
+    meta: Object
+})
 </script>
 
 <template>
   <nav class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4" aria-label="Table navigation">
     <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
         Showing
-        <span class="font-semibold text-gray-900 dark:text-white">1-10</span>
+        <span class="font-semibold text-gray-900 dark:text-white">{{ meta?.current_page || 1 }}-{{ meta?.total_count || 1  }}</span>
         of
-        <span class="font-semibold text-gray-900 dark:text-white">1000</span>
+        <span class="font-semibold text-gray-900 dark:text-white">{{ meta?.total_pages || 1 }}</span>
     </span>
     <ul class="inline-flex items-stretch -space-x-px">
         <li>
@@ -21,7 +24,7 @@
         <li>
             <a href="#" class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
         </li>
-        <li>
+        <!-- <li>
             <a href="#" class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
         </li>
         <li>
@@ -32,7 +35,7 @@
         </li>
         <li>
             <a href="#" class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">100</a>
-        </li>
+        </li> -->
         <li>
             <a href="#" class="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                 <span class="sr-only">Next</span>

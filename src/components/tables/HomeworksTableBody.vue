@@ -1,5 +1,10 @@
 <script setup>
 import HomeworksTableRow from './HomeworksTableRow.vue';
+
+const props = defineProps({
+    homeworks: Array
+});
+
 </script>
 
 <template>
@@ -17,7 +22,12 @@ import HomeworksTableRow from './HomeworksTableRow.vue';
                         </tr>
                     </thead>
                     <tbody>
-                        <HomeworksTableRow :id="1" title="Calculus" subject="Mathematics" submission="1/20" due-date="24-01-2024" />
+                        <HomeworksTableRow v-for="homework in homeworks" 
+                            :id="homework.id" 
+                            :title="homework.title" 
+                            :subject="homework.subject" 
+                            :submission="`${homework.submitted}/${homework.total}`" 
+                            :due-date="homework.due_date"/>
                     </tbody>
                 </table>
             </div>

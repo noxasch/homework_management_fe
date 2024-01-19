@@ -5,7 +5,8 @@ import request from '@/lib/request';
 const baseUrl = 'http://127.0.0.1:3000';
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(sessionStorage.getItem('token'));
+  const token = ref(sessionStorage.getItem('token') || null);
+  const user = ref(sessionStorage.getItem('user') || {});
 
   function setUser(payload) {
     token.value = payload.access_token;
@@ -29,7 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
     const responseData = await response.json();
     if (!response.ok) {
       console.log(responseData);
-      sessionStorage.setItem('token', null);
+      clear();
       // const error = new Error(responseData.message || 'Authentication failed!');
       // throw error;
     } else {
@@ -38,18 +39,40 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-   async function logout() {
+  function clear() {
+    sessionStorage.setItem('token', null);
+    sessionStorage.setItem('user', {});
+    token.value = null;
+    user.value = {}
+  }
+
+  async function logout() {
     const response = await request.post(`${baseUrl}/oauth/revoke`, {token: token.value});
 
     const responseData = await response.json();
     if (!response.ok) {
       console.log(responseData);
-      sessionStorage.setItem('token', null);
     } else {
       sessionStorage.setItem('token', null);
       token.value = null;
     }
   }
 
-  return { isLoggedIn, token, login, logout };
+  async function sync() {
+    const response = await request.get(`${baseUrl}/api/v1/users/sync`, {token: token.value});
+
+    const responseData = await response.json();
+    console.log(responseData);
+    if (!response.ok) {
+      console.log(responseData);
+      clear();
+    } else {
+      user.value = responseData;
+      // console.log()
+      sessionStorage.setItem('user', responseData);
+      // token.value = null;
+    }
+  }
+
+  return { isLoggedIn, token, login, logout, sync };
 });
