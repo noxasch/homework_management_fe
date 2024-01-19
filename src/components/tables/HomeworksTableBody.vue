@@ -25,6 +25,7 @@ const props = defineProps({
                         <HomeworksTableRow v-for="homework in homeworks" 
                             :id="homework.id" 
                             :title="homework.title" 
+                            :color="homework.color"
                             :subject="homework.subject" 
                             :submission="`${homework.submitted}/${homework.total}`" 
                             :due-date="homework.due_date"/>

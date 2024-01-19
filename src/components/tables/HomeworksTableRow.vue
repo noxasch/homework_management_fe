@@ -4,6 +4,7 @@ import { initFlowbite } from 'flowbite';
 
 const props = defineProps({
   id: Number,
+  color: String,
   title: String,
   subject: String,
   dueDate: String,
@@ -18,7 +19,8 @@ onMounted(() => {
 <template>
   <tr class="border-b dark:border-gray-700">
     <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ title }}</th>
-    <td class="px-4 py-3">{{ subject }}</td>
+    <td class="px-4 py-3">
+        <span class="text-xs font-medium me-2 px-2.5 py-1.5 rounded-full" :style="{backgroundColor: color, color: '#fff'}">{{ subject }}</span></td>
     <td class="px-4 py-3">{{ dueDate }}</td>
     <td class="px-4 py-3">{{ submission }}</td>
     <td class="px-4 py-3 flex items-center justify-end">

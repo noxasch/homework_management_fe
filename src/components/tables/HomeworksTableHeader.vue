@@ -58,5 +58,5 @@ onMounted(() => {
         </div>
     </div>
 
-    <HomeworkModal />
+    <HomeworkModal :subjects="subjects" />
 </template>

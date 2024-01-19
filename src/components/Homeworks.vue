@@ -5,8 +5,10 @@ import HomeworksTableBody from './tables/HomeworksTableBody.vue';
 import HomeworksTableHeader from './tables/HomeworksTableHeader.vue';
 import { useAuthStore } from '@/stores/auth';
 import request from '@/lib/request';
+import { useRouter } from 'vue-router';
 
 const auth = useAuthStore();
+const router = useRouter();
 
 const subjects = ref([]);
 const homeworks = ref([]);
@@ -14,16 +16,28 @@ const paginationMeta = ref({});
 
 async function fetchSubjects() {
   const response = await request.get('http://127.0.0.1:3000/api/v1/teachers/subjects', {token: auth.token});
-  const responseData = await response.json();
-  subjects.value = responseData.subjects;
+  if (response.ok) {
+    const responseData = await response.json();
+    subjects.value = responseData.subjects;
+    console.log(responseData);
+  } else {
+    auth.clear();
+    router.push({ name: 'login' });
+  }
+  
 }
 
 async function fetchHomeworks() {
   const response = await request.get('http://127.0.0.1:3000/api/v1/teachers/homeworks', {token: auth.token});
-  const responseData = await response.json();
-  homeworks.value = responseData.homeworks;
-  paginationMeta.value = responseData.meta;
-  console.log(responseData);
+  if (response.ok) {
+    const responseData = await response.json();
+    homeworks.value = responseData.homeworks;
+    paginationMeta.value = responseData.meta;
+    console.log(responseData);
+  } else {
+    auth.clear();
+    router.push({ name: 'login' });
+  }
 }
 
 onMounted(async () => {
