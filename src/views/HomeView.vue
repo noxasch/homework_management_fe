@@ -1,8 +1,9 @@
 <script setup>
+import Homeworks from '@/components/Homeworks.vue';
 </script>
 
 <template>
   <main>
-    <h1>This is home page</h1>
+    <Homeworks />
   </main>
 </template>
