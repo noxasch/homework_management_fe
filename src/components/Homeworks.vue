@@ -6,13 +6,13 @@ import HomeworksTableHeader from './tables/HomeworksTableHeader.vue';
 import { useAuthStore } from '@/stores/auth';
 import request from '@/lib/request';
 import { useRouter } from 'vue-router';
+import { useHomeworksStore } from '@/stores/homeworks';
 
 const auth = useAuthStore();
+const homeworks = useHomeworksStore();
 const router = useRouter();
 
 const subjects = ref([]);
-const homeworks = ref([]);
-const paginationMeta = ref({});
 
 async function fetchSubjects() {
   const response = await request.get('http://127.0.0.1:3000/api/v1/teachers/subjects', {token: auth.token});
@@ -28,13 +28,8 @@ async function fetchSubjects() {
 }
 
 async function fetchHomeworks() {
-  const response = await request.get('http://127.0.0.1:3000/api/v1/teachers/homeworks', {token: auth.token});
-  if (response.ok) {
-    const responseData = await response.json();
-    homeworks.value = responseData.homeworks;
-    paginationMeta.value = responseData.meta;
-    console.log(responseData);
-  } else {
+  const result = await homeworks.get();
+  if (!result) {
     auth.clear();
     router.push({ name: 'login' });
   }
@@ -52,7 +47,7 @@ onMounted(async () => {
 
       <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-visible">
           <HomeworksTableHeader :subjects="subjects" />
-          <HomeworksTableBody :homeworks="homeworks" />
+          <HomeworksTableBody :homeworks="homeworks.homeworks" />
           <TablePagination />
       </div>
     </div>

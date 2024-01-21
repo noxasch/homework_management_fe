@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import Datepicker from 'flowbite-datepicker/Datepicker';
-import { Dismiss } from "flowbite";
+import { Modal } from "flowbite";
 import request from '@/lib/request';
 import { useAuthStore } from '@/stores/auth';
+import { useHomeworksStore } from '@/stores/homeworks';
 
-const auth = useAuthStore();
+const homeworks = useHomeworksStore();
 
 const dueDatepicker = ref(null);
 const params = ref({
@@ -23,30 +24,20 @@ onMounted(() => {
     new Datepicker(dueDatepicker.value, {}); 
 });
 
-async function createHomework() {
-  const response = await request.post('http://127.0.0.1:3000/api/v1/teachers/homeworks', {token: auth.token, payload: params.value});
-  const responseData = await response.json();
-//   subjects.value = responseData.subjects;
-//   console.log(responseData);
-    return response.ok;
-}
 
 async function onSubmit() {
     params.value.due_at = dueDatepicker.value.value;
 
     // submit
-    const res = await createHomework();
+    const res = await homeworks.create(params.value);
 
     if (res) {
         // show toast on confirmation
 
         // close modal
         const modal = document.querySelector('#homeworkModal');
-        const backdrop = document.querySelector('[modal-backdrop]');
-        // modal.classList.toggle('hidden');
-        const dismiss = new Dismiss(modal);
-        dismiss.hide()
-        backdrop.remove();
+        const dismiss = new Modal(modal);
+        dismiss.hide();
     }
 
 }
