@@ -1,22 +1,55 @@
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { initFlowbite } from 'flowbite';
 import HomeworkModal from '../modals/HomeworkModal.vue';
+import request from '@/lib/request';
+import { useAuthStore } from '@/stores/auth';
+import { useHomeworksStore } from '@/stores/homeworkStore';
+
+const auth = useAuthStore();
+const homeworksStore = useHomeworksStore();
 
 const props = defineProps({
     subjects: Array
 });
 
-onMounted(() => {
-    initFlowbite();
-})
+const searchParams = ref('')
+
+/** @param {Response} response */
+async function handleResponse(response) {
+  if (response.ok) {
+      const responseData = await response.json();
+      homeworksStore.set(responseData.homeworks)
+  } else {
+      console.log(response.status)
+      // auth.clear();
+      // router.push({ name: 'login' });
+  }
+}
+
+async function search() {
+    if (searchParams.value.length > 0) {
+        const response =  await request.get('/api/v1/teachers/homeworks', {
+            token: auth.token,
+            searchParams: {
+                query: searchParams.value
+            }
+        })
+        handleResponse(response)
+    } else {
+        const response = await request.get('/api/v1/teachers/homeworks', {
+            token: auth.token
+        })
+        handleResponse(response)
+    }
+}
 </script>
 
 <template>
     <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
         <div class="w-full md:w-1/2">
-            <form class="flex items-center">
+            <form class="flex items-center" @keypress.enter="search" @submit.prevent>
                 <label for="simple-search" class="sr-only">Search</label>
                 <div class="relative w-full">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -24,12 +57,12 @@ onMounted(() => {
                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <input type="text" id="simple-search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Search" required="">
+                    <input type="text" id="simple-search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Search" v-model="searchParams" @keypress.enter="search">
                 </div>
             </form>
         </div>
         <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-            <button type="button" data-modal-target="homeworkModal" data-modal-toggle="homeworkModal" class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
+            <button type="button" data-modal-target="homework-modal" data-modal-toggle="homework-modal" class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
             <svg class="h-3.5 w-3.5 mr-2" aria-hidden="true" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" >
                 <path clip-rule="evenodd" stroke="currentColor"  fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
             </svg>

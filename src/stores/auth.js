@@ -1,30 +1,36 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
+import api from '@/lib/api/auth';
 import request from '@/lib/request';
 
-const baseUrl = 'http://127.0.0.1:3000';
 
-export const useAuthStore = defineStore('auth', () => {
+export const useAuthStore = defineStore('auth', () => {  
+  /** @type {ref<{string}>} */
   const token = ref(sessionStorage.getItem('token') || null);
+
+  /** @type {ref<{ name: string, email: string}>} */
   const user = ref(sessionStorage.getItem('user') || {});
 
+  /** 
+   * @param {{access_token: string}} payload 
+   */
   function setUser(payload) {
     token.value = payload.access_token;
     sessionStorage.setItem('token', payload.access_token);
   }
-
+  
   function isLoggedIn() {
-    return token.value !== null && token.value !== undefined;
+    return token.value !== 'null' && token.value !== null && token.value !== undefined;
   }
 
-  /** @param {Object} payload */
+  /** 
+   * @param {Object} payload 
+   * @return {Promise<{void}>}
+  */
   async function login(payload) {
-    const response = await request.post(`${baseUrl}/oauth/token`, {
-      payload: {
-        email: payload.email,
-        password: payload.password,
-        grant_type: 'password'
-      }
+    const response = await api.login({
+      email: payload.email,
+      password: payload.password,
     })
 
     const responseData = await response.json();
@@ -47,7 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    const response = await request.post(`${baseUrl}/oauth/revoke`, {token: token.value});
+    const response = await api.logout(token.value)
 
     const responseData = await response.json();
     if (!response.ok) {
@@ -59,12 +65,10 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function sync() {
-    const response = await request.get(`${baseUrl}/api/v1/users/sync`, {token: token.value});
+    const response = await request.get('api/v1/users/sync', {token: token.value});
 
     const responseData = await response.json();
-    console.log(responseData);
     if (!response.ok) {
-      console.log(responseData);
       clear();
     } else {
       user.value = responseData;

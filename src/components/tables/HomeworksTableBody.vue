@@ -1,9 +1,10 @@
 <script setup>
+import { storeToRefs } from 'pinia';
 import HomeworksTableRow from './HomeworksTableRow.vue';
 
-const props = defineProps({
-    homeworks: Array
-});
+import { useHomeworksStore } from '@/stores/homeworkStore';
+const homeworksStore = useHomeworksStore();
+const { homeworks } = storeToRefs(homeworksStore);
 
 </script>
 

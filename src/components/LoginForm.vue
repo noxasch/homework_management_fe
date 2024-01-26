@@ -10,6 +10,7 @@ const credentials = ref({ email: '', password: ''});
 
 async function onLogin() {
     await auth.login({email: credentials.value.email, password: credentials.value.password});
+    
     if (auth.isLoggedIn()) {
         await auth.sync();
         router.push({ name: 'home' });
