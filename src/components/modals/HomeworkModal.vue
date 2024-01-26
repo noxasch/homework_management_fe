@@ -1,14 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import Datepicker from 'flowbite-datepicker/Datepicker';
-import { Modal } from "flowbite";
+import { Modal, initFlowbite } from "flowbite";
 import request from '@/lib/request';
 import { useAuthStore } from '@/stores/auth';
-import { useHomeworksStore } from '@/stores/homeworks';
+import { useHomeworksStore } from '@/stores/homeworkStore';
 
-const homeworks = useHomeworksStore();
+const auth = useAuthStore()
+const homeworksStore = useHomeworksStore()
 
-const dueDatepicker = ref(null);
+const dueDatepicker = ref(null)
 const params = ref({
     title: '',
     subject_id: null,
@@ -21,37 +22,60 @@ defineProps({
 
 onMounted(() => {
     dueDatepicker.value = document.getElementById('due-datepicker');
-    new Datepicker(dueDatepicker.value, {}); 
+    new Datepicker(dueDatepicker.value, {
+      format: 'dd/mm/yyyy'
+    }); 
 });
 
+async function createHomework() {
+  const response = await request.post('/api/v1/teachers/homeworks', {token: auth.token, payload: params.value});
+
+  const responseData = await response.json();
+    if(response.ok) {
+        homeworksStore.add(responseData)
+    }
+
+    return response.ok;
+}
 
 async function onSubmit() {
+    console.log('ON_SUBMIT');
     params.value.due_at = dueDatepicker.value.value;
 
     // submit
-    const res = await homeworks.create(params.value);
+    const res = await createHomework(params.value)
+    console.log('RES', res)
 
     if (res) {
-        // show toast on confirmation
+      const modalOptions = {
+        placement: 'bottom-right',
+        backdrop: 'static',
+        backdropClasses:
+            'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+        closable: true,
+      }
 
-        // close modal
-        const modal = document.querySelector('#homeworkModal');
-        const dismiss = new Modal(modal);
-        dismiss.hide();
+      const instanceOptions = {
+        id: 'homeworkModal',
+        override: true
+      };
+
+      const el = document.querySelector('#homeworkModal');
+      const modal = new Modal(el, modalOptions, instanceOptions);
+      modal.hide();
     }
 
+ 
+
 }
+
+onMounted(() => {
+    initFlowbite();
+})
 </script>
 
 <template>
-  <!-- Modal toggle -->
-<!-- <div class="flex justify-center m-5">
-    <button id="defaultModalButton" data-modal-target="defaultModal" data-modal-toggle="defaultModal" class="block text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" type="button">
-    Create product
-    </button>
-</div> -->
 
-<!-- Main modal -->
 <div id="homeworkModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
     <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
         <!-- Modal content -->
@@ -71,7 +95,12 @@ async function onSubmit() {
                 <div class="grid gap-4 mb-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
-                        <input v-model="params.title" type="text" name="title" id="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Homework title" required="">
+                        <input v-model="params.title" type="text" name="title" id="title" 
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                                focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5
+                                dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400
+                                dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" 
+                            placeholder="Homework title" required="" />
                     </div>
                     <div class="sm:col-span-2">
                         <label for="subject" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Subject</label>
@@ -93,7 +122,7 @@ async function onSubmit() {
                                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                 </svg>
                             </div>
-                            <input datepicker id="due-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+                            <input datepicker datepicker-format="{dd/mm/yyyy}" id="due-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
                         </div>
                     </div>
                 </div>
