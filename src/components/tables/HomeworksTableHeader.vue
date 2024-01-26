@@ -1,14 +1,14 @@
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { initFlowbite } from 'flowbite';
+import { ref } from 'vue';
 import HomeworkModal from '../modals/HomeworkModal.vue';
-import request from '@/lib/request';
 import { useAuthStore } from '@/stores/auth';
 import { useHomeworksStore } from '@/stores/homeworkStore';
+import { useHomeworksApi } from '@/lib/api/homeworksApi';  
 
 const auth = useAuthStore();
 const homeworksStore = useHomeworksStore();
+const homeworksApi = useHomeworksApi()
 
 const props = defineProps({
     subjects: Array
@@ -19,30 +19,23 @@ const searchParams = ref('')
 /** @param {Response} response */
 async function handleResponse(response) {
   if (response.ok) {
-      const responseData = await response.json();
-      homeworksStore.set(responseData.homeworks)
+    const responseData = await response.json();
+    homeworksStore.set(responseData.homeworks)
   } else {
-      console.log(response.status)
-      // auth.clear();
-      // router.push({ name: 'login' });
+    console.log(response.status)
+    // auth.clear();
+    // router.push({ name: 'login' });
   }
 }
 
 async function search() {
-    if (searchParams.value.length > 0) {
-        const response =  await request.get('/api/v1/teachers/homeworks', {
-            token: auth.token,
-            searchParams: {
-                query: searchParams.value
-            }
-        })
-        handleResponse(response)
-    } else {
-        const response = await request.get('/api/v1/teachers/homeworks', {
-            token: auth.token
-        })
-        handleResponse(response)
-    }
+  if (searchParams.value.length > 0) {
+    const response = await homeworksApi.search(searchParams.value)
+    handleResponse(response)
+  } else {
+    const response = await homeworksApi.index()
+    handleResponse(response)
+  }
 }
 </script>
 

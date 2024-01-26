@@ -2,12 +2,15 @@
 import { ref, onMounted } from 'vue';
 import Datepicker from 'flowbite-datepicker/Datepicker';
 import { Modal, initFlowbite } from "flowbite";
-import request from '@/lib/request';
-import { useAuthStore } from '@/stores/auth';
 import { useHomeworksStore } from '@/stores/homeworkStore';
+import { useHomeworksApi } from '@/lib/api/homeworksApi';  
 
-const auth = useAuthStore()
+defineProps({
+    subjects: Array
+});
+
 const homeworksStore = useHomeworksStore()
+const homeworksApi = useHomeworksApi()
 
 const dueDatepicker = ref(null)
 const params = ref({
@@ -16,61 +19,52 @@ const params = ref({
     due_at: null,
 });
 
-defineProps({
-    subjects: Array
-});
-
-onMounted(() => {
-    dueDatepicker.value = document.getElementById('due-datepicker');
-    new Datepicker(dueDatepicker.value, {
-      format: 'dd/mm/yyyy'
-    }); 
-});
+function initDatePicker() {
+  new Datepicker(dueDatepicker.value, {
+    format: 'dd/mm/yyyy'
+  }); 
+}
 
 async function createHomework() {
-  const response = await request.post('/api/v1/teachers/homeworks', {token: auth.token, payload: params.value});
-
+  const response =  await homeworksApi.create(params.value)
   const responseData = await response.json();
-    if(response.ok) {
-        homeworksStore.add(responseData)
-    }
 
-    return response.ok;
+  if(response.ok) {
+    homeworksStore.add(responseData)
+  }
+
+  return response.ok;
 }
 
 async function onSubmit() {
-    console.log('ON_SUBMIT');
-    params.value.due_at = dueDatepicker.value.value;
+  params.value.due_at = dueDatepicker.value.value
 
-    // submit
-    const res = await createHomework(params.value)
-    console.log('RES', res)
+  // submit
+  const res = await createHomework(params.value)
 
-    if (res) {
-      const modalOptions = {
-        placement: 'bottom-right',
-        backdrop: 'static',
-        backdropClasses:
-            'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
-        closable: true,
-      }
-
-      const instanceOptions = {
-        id: 'homeworkModal',
-        override: true
-      };
-
-      const el = document.querySelector('#homeworkModal');
-      const modal = new Modal(el, modalOptions, instanceOptions);
-      modal.hide();
+  if (res) {
+    const modalOptions = {
+      placement: 'bottom-right',
+      backdrop: 'static',
+      backdropClasses:
+          'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+      closable: true,
     }
 
- 
+    const instanceOptions = {
+      id: 'homeworkModal',
+      override: true
+    };
 
+    const el = document.querySelector('#homeworkModal');
+    const modal = new Modal(el, modalOptions, instanceOptions)
+    modal.hide();
+  }
 }
 
 onMounted(() => {
-    initFlowbite();
+    initFlowbite()
+    initDatePicker()
 })
 </script>
 
@@ -122,7 +116,7 @@ onMounted(() => {
                                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                 </svg>
                             </div>
-                            <input datepicker datepicker-format="{dd/mm/yyyy}" id="due-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+                            <input ref="dueDatepicker" datepicker datepicker-format="{dd/mm/yyyy}" id="due-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
                         </div>
                     </div>
                 </div>

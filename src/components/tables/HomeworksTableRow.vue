@@ -1,9 +1,9 @@
 <script setup>
 import { onMounted } from 'vue';
 import { initFlowbite } from 'flowbite';
-import request from '@/lib/request';
 import { useAuthStore } from '@/stores/auth';
 import { useHomeworksStore } from '@/stores/homeworkStore';
+import { useHomeworksApi } from '@/lib/api/homeworksApi';  
 
 const props = defineProps({
   id: Number,
@@ -16,20 +16,18 @@ const props = defineProps({
 
 const auth = useAuthStore()
 const homeworksStore = useHomeworksStore()
+const homeworksApi = useHomeworksApi()
 
 async function onDelete() {
-    const response = await request.destroy(
-        `/api/v1/teachers/homeworks/${props.id}`, 
-        { token: auth.token }
-    );
-    
-    if (response.ok) {
-        homeworksStore.remove(props.id)
-    }
+  const response = await homeworksApi.destroy(props.id)
+  
+  if (response.ok) {
+    homeworksStore.remove(props.id)
+  }
 }
 
 onMounted(() => {
-    initFlowbite();
+  initFlowbite();
 })
 </script>
 

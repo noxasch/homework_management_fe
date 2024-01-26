@@ -7,13 +7,14 @@ import { useAuthStore } from '@/stores/auth';
 import request from '@/lib/request';
 import { useRouter } from 'vue-router';
 import { useHomeworksStore } from '@/stores/homeworkStore';
+import { useHomeworksApi } from '@/lib/api/homeworksApi';  
 
 const auth = useAuthStore();
-const homeworks = useHomeworksStore();
 const router = useRouter();
+const homeworksStore = useHomeworksStore();
+const homeworksApi = useHomeworksApi()
 
 const subjects = ref([]);
-const homeworksStore = useHomeworksStore();
 const paginationMeta = ref({});
 
 async function fetchSubjects() {
@@ -29,7 +30,8 @@ async function fetchSubjects() {
 }
 
 async function fetchHomeworks() {
-  const response = await request.get('/api/v1/teachers/homeworks', {token: auth.token});
+  const response = await homeworksApi.index()
+
   if (response.ok) {
     const responseData = await response.json();
     homeworksStore.set(responseData.homeworks)

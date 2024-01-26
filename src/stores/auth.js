@@ -2,11 +2,12 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import api from '@/lib/api/auth';
 import request from '@/lib/request';
+import cookies from '@/lib/cookies';
 
 
 export const useAuthStore = defineStore('auth', () => {  
   /** @type {ref<{string}>} */
-  const token = ref(sessionStorage.getItem('token') || null);
+  const token = ref(cookies.get('token') || null);
 
   /** @type {ref<{ name: string, email: string}>} */
   const user = ref(sessionStorage.getItem('user') || {});
@@ -16,7 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
    */
   function setUser(payload) {
     token.value = payload.access_token;
-    sessionStorage.setItem('token', payload.access_token);
+    cookies.set({ 'token': payload.access_token })
   }
   
   function isLoggedIn() {
