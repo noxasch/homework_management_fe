@@ -14,5 +14,9 @@ export const useHomeworksStore = defineStore('homeworks', () => {
     homeworks.value.push(item)
   }
 
-  return { homeworks, get, set, add }
+  function remove(id) {
+    homeworks.value = homeworks.value.filter((h) => h.id !== id)
+  }
+
+  return { homeworks, get, set, add, remove }
 })

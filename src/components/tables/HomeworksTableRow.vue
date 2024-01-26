@@ -1,6 +1,9 @@
 <script setup>
 import { onMounted } from 'vue';
 import { initFlowbite } from 'flowbite';
+import request from '@/lib/request';
+import { useAuthStore } from '@/stores/auth';
+import { useHomeworksStore } from '@/stores/homeworkStore';
 
 const props = defineProps({
   id: Number,
@@ -10,6 +13,20 @@ const props = defineProps({
   dueDate: String,
   submission: String
 })
+
+const auth = useAuthStore()
+const homeworksStore = useHomeworksStore()
+
+async function onDelete() {
+    const response = await request.destroy(
+        `/api/v1/teachers/homeworks/${props.id}`, 
+        { token: auth.token }
+    );
+    
+    if (response.ok) {
+        homeworksStore.remove(props.id)
+    }
+}
 
 onMounted(() => {
     initFlowbite();
@@ -39,7 +56,7 @@ onMounted(() => {
                 </li>
             </ul>
             <div class="py-1">
-                <a href="#" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete</a>
+                <a href="#" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" @click="onDelete">Delete</a>
             </div>
         </div>
     </td>
